@@ -1,42 +1,40 @@
 using UnityEngine;
 
-public class BalloonBuilder : MonoBehaviour
+namespace BalloonGame
 {
-    //scripts
-    GameControl gControl;
-    
-    //gameObject
-    public GameObject balloon;
-    
-    //numeric
-    public float ballonCreateTime = 1f;
-    public float timeCounter = 0f;
-    
-    void Start()
+    public class BalloonBuilder : MonoBehaviour
     {
-        gControl = this.gameObject.GetComponent<GameControl>();
-    }
+        // The balloon prefab to be assigned from the Inspector
+        [SerializeField] private GameObject balloon;
 
-    void Update()
-    {
-        timeCounter -= Time.deltaTime;
-        if(timeCounter < 0 && gControl.getTimeCounter() > 0)
+        // Time interval for creating balloons (1 second)
+        private float ballonCreateTime = 1f;
+        // A timer to keep track of time between balloon spawns
+        private float timeCounter = 0f;
+
+        void Update()
         {
-            InstantiateBallon(getMultiplyNumber());
+            // Decrease the timer every frame
+            timeCounter -= Time.deltaTime;
+
+            // When the timer reaches below 0 and the game is not over, create a balloon
+            if (timeCounter < 0 && !GameControl.instance.gameOver)
+            {
+                InstantiateBallon();
+            }
         }
-    }
 
-    void InstantiateBallon(int _multiply)
-    {
-        GameObject go = Instantiate(balloon, new Vector3(Random.Range(-2.25f, 2.25f), -6, 0), Quaternion.Euler(0, 0, 0));
-        go.GetComponent<Rigidbody2D>().AddForce(new Vector3(0, Random.Range(50f * _multiply, 100f * _multiply), 0));
-        timeCounter = ballonCreateTime;
-    }
+        // Method to instantiate a new balloon
+        void InstantiateBallon()
+        {
+            // Instantiate a balloon at a random x position within the specified range
+            GameObject go = Instantiate(balloon, new Vector3(Random.Range(-2.25f, 2.25f), -6, 0), Quaternion.Euler(0, 0, 0), transform);
 
-    int getMultiplyNumber()
-    {
-        int multiply = (int)(gControl.getTimeCounter() / 10) - 6;
-        multiply *= -1;
-        return multiply;
+            // Add the created balloon to the game control's balloon list
+            GameControl.instance.AddBalloonToList(go);
+
+            // Reset the timer to the balloon creation interval
+            timeCounter = ballonCreateTime;
+        }
     }
 }
